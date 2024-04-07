@@ -29,7 +29,6 @@ async def scrape_website(data: dict[str, any]):
             continue # if response is not sucessful after all retries moving to the next page
         html_content = response.text
         soup = BeautifulSoup(html_content, "html.parser")
-        await scraper.scrape(soup)
         scraped_data += await scraper.scrape(soup)
     
     await scraper.save(scraped_data)
@@ -79,7 +78,6 @@ class DentalStall():
     async def scrape(self, soup: BeautifulSoup):
         product_elements = soup.find_all("li", class_="product")
         scraped_data = []
-    
         for product_element in product_elements:
             name = product_element.find("h2", class_="woo-loop-product__title").text.strip()
     
@@ -89,13 +87,12 @@ class DentalStall():
             image_element = product_element.find("img", class_="attachment-woocommerce_thumbnail size-woocommerce_thumbnail")
             image_url = image_element["data-lazy-src"] if image_element else "N/A"
     
-            self.scraped_data_count += 1
-
             entry = self.model()
             entry.product_title = name
             entry.product_price = float(price.replace('\u20b9', '')) #removing rupee symbol
             entry.path_to_image = image_url
             scraped_data.append(entry)
+            self.scraped_data_count += 1
         return scraped_data
 
     async def save(self, scraped_data: list[DentalStallProdpuctCatalogue]):
