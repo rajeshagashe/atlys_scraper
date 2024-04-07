@@ -1,9 +1,5 @@
 import json
 from pydantic import BaseModel
-from typing import Optional
-from pathlib import Path
-import tempfile
-import shutil
 
 class DentalStallProdpuctCatalogue(BaseModel):
     product_title: str = "" #considering this unqiue id
