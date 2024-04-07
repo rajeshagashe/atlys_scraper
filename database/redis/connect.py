@@ -1,17 +1,3 @@
-import aioredis
-import os
+import redis
 
-redis = None
-async def connect_redis():
-    global redis
-    connection_string = os.environ.get('REDIS_CONN')
-    redis = await aioredis.from_url(connection_string)
-    return redis
-
-async def disconnect_redis():
-    if redis:
-        redis.close()
-        await redis.wait_closed()
-
-connect_redis()
-print(redis)
+redis_client = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)

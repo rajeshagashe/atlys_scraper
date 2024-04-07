@@ -1,6 +1,6 @@
 import httpx
 import asyncio
-import re
+import json
 
 from typing import Callable, Union
 from bs4 import BeautifulSoup
@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 
 from ..models.dental_stall import DentalStallProdpuctCatalogue
 from modules.records.models.records import Records
+from utils import utils
 
 async def scrape_website(data: dict[str, any]):
     url = data.get("url")
@@ -97,24 +98,8 @@ class DentalStall():
 
     async def save(self, scraped_data: list[DentalStallProdpuctCatalogue]):
         for product in scraped_data:
-            if not compare_dicts(fetch_cache(product.product_title), product.model_dump()):
-                upsert_cache()
+            cache = await utils.fetch_cache(product.path_to_image)
+            if not utils.compare_dicts(cache, product.model_dump()):
+                await utils.upsert_cache(product.path_to_image, product.model_dump())
                 await product.upsert()
                 self.updated_data_count += 1
-
-
-def compare_dicts(dict1, dict2): #move to utils
-    if set(dict1.keys()) != set(dict2.keys()):
-        return False
-    
-    for key in dict1:
-        if dict1[key] != dict2[key]:
-            return False
-    
-    return True
-
-def fetch_cache(id): #move to utils
-    return {}
-
-def upsert_cache(): #move to utils
-    pass
