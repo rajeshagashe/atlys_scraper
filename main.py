@@ -1,7 +1,9 @@
 from fastapi import FastAPI
+from dotenv import load_dotenv
+from modules.scraper.handlers.scraper_handler import scrape_router 
+
+load_dotenv()
 
 app = FastAPI()
 
-@app.get("/")
-async def hello_world():
-    return {"message": "Hello World"}
+app.include_router(scrape_router)
