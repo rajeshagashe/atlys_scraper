@@ -3,8 +3,8 @@ from pydantic import BaseModel
 
 class DentalStallProdpuctCatalogue(BaseModel):
     product_title: str = ""
-    product_price: float = 0
-    path_to_image: str = "" #considering this to be the unqiue id
+    product_price: str = ""
+    path_to_image: str = "" #considering combination of all three to be the unqiue id
 
     async def upsert(self) -> None: # this method can be overwritten to write to a differnet db
         filename = 'database.json'
@@ -20,7 +20,9 @@ class DentalStallProdpuctCatalogue(BaseModel):
         record_index = None
         for i, db_record in enumerate(database):
             db_record = json.loads(db_record)
-            if db_record.get("path_to_image") == self.path_to_image:
+            if db_record.get("path_to_image") == self.path_to_image \
+                and db_record.get("product_title") == self.product_title\
+                and db_record.get("product_price") == self.product_price:
                 record_index = i
                 break
 

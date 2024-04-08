@@ -7,7 +7,6 @@ class Retries(BaseModel):
 
 class scraper_dto(BaseModel):
     url: str
-    start_page: int = Field(default=1, ge=1)
-    end_page: int = Field(default=1, le=100) # hard-coding maximum value to save time. Should be made configurable
+    page_count: Union[int, None] = Field(None, ge=1)
     proxy_string: Union[str, None] = None
     retries: Retries = {}

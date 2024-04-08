@@ -12,25 +12,39 @@ from utils import utils
 
 async def scrape_website(data: dict[str, any]):
     url = data.get("url")
-    start_page = data.get("start_page")
-    end_page = data.get("end_page")
+    page_count = data.get("page_count")
     proxy_string = data.get("proxy_string")
     scraper = scraper_factory(data.get('url'))()
+    
     # not considering dynamic loading for new page
     scraped_data = []
-    for i in range(start_page, end_page+1):
-        if i > 1:
-            page_url = urljoin(url, scraper.pagination_path.replace('page_no', str(i)))
+    status = 200
+    page_no = 1
+    while status != 404:
+        if page_no > 1:
+            page_url = urljoin(url, scraper.pagination_path.replace('page_no', str(page_no)))
         else:
             page_url = url
+        
         response = await fetch_data(page_url, proxy_string, data.get('retries'))
-        if response.status_code == 404: #all pages scraped
-            break
+        status = response.status_code
+        
         if not response.is_success:
+            page_no += 1
             continue # if response is not sucessful after all retries moving to the next page
+        
         html_content = response.text
         soup = BeautifulSoup(html_content, "html.parser")
-        scraped_data += await scraper.scrape(soup)
+        
+        try:
+            scraped_data += await scraper.scrape(soup)
+        except Exception as e:
+            # not raising error as some pages may have different structure, just ignoring those cases
+            print(str(e))
+        
+        if page_count and page_no == page_count:
+            break
+        page_no += 1
     
     await scraper.save(scraped_data)
     record = Records()
@@ -90,7 +104,7 @@ class DentalStall():
     
             entry = self.model()
             entry.product_title = name
-            entry.product_price = float(price.replace('\u20b9', '')) #removing rupee symbol
+            entry.product_price = price.replace('\u20b9', '') #removing rupee symbol
             entry.path_to_image = image_url
             scraped_data.append(entry)
             self.scraped_data_count += 1
@@ -98,8 +112,10 @@ class DentalStall():
 
     async def save(self, scraped_data: list[DentalStallProdpuctCatalogue]):
         for product in scraped_data:
-            cache = await utils.fetch_cache(product.path_to_image)
+            key = self.__class__.__name__ + '_' + product.product_title \
+                + '_' + product.path_to_image + '_' + product.product_price
+            cache = await utils.fetch_cache(key)
             if not utils.compare_dicts(cache, product.model_dump()):
-                await utils.upsert_cache(product.path_to_image, product.model_dump())
+                await utils.upsert_cache(key, product.model_dump())
                 await product.upsert()
                 self.updated_data_count += 1
