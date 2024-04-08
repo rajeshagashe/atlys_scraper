@@ -10,7 +10,7 @@ from ..models.dental_stall import DentalStallProdpuctCatalogue
 from modules.records.models.records import Records
 from utils import utils
 
-async def scrape_website(data: dict[str, any]):
+async def scrape_website(data: dict[str, any], session_id: str):
     url = data.get("url")
     page_count = data.get("page_count")
     proxy_string = data.get("proxy_string")
@@ -48,6 +48,7 @@ async def scrape_website(data: dict[str, any]):
     
     await scraper.save(scraped_data)
     record = Records()
+    record.session_id = session_id
     record.scraped_count = scraper.scraped_data_count
     record.updated_count = scraper.updated_data_count
     record.save()
