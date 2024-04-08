@@ -6,7 +6,7 @@ import random
 from typing import Annotated, Union
 from fastapi import APIRouter, HTTPException, Header
 
-from ..helpers.scraper_helper import scraper_factory, scrape_website
+from ..helpers.scraper_helper import scrape_website
 from ..dto.dto import ScraperDTO
 
 scrape_router = APIRouter(prefix="/v1/scrape")

@@ -1,8 +1,4 @@
-import httpx
-import asyncio
-import json
-
-from typing import Callable, Union
+from typing import Callable
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
@@ -10,7 +6,7 @@ from ..models.dental_stall import DentalStallProdpuctCatalogue
 from modules.records.models.records import Records
 from utils import utils
 
-async def scrape_website(data: dict[str, any], session_id: str):
+async def scrape_website(data: dict[str, any], session_id: str) -> None:
     url = data.get("url")
     page_count = data.get("page_count")
     proxy_string = data.get("proxy_string")
@@ -26,7 +22,7 @@ async def scrape_website(data: dict[str, any], session_id: str):
         else:
             page_url = url
         
-        response = await fetch_data(page_url, proxy_string, data.get('retries'))
+        response = await utils.fetch_get_response(page_url, proxy_string, data.get('retries'))
         status = response.status_code
         
         if not response.is_success:
@@ -52,26 +48,6 @@ async def scrape_website(data: dict[str, any], session_id: str):
     record.scraped_count = scraper.scraped_data_count
     record.updated_count = scraper.updated_data_count
     record.save()
-
-async def fetch_data(url: str, proxy: Union[str, None] = None, retry_options: dict[str, any] = {}) -> str: #move to utils
-        status_code = 500
-        retries = retry_options.get('count', 1)
-        delay = retry_options.get('interval', 1)
-        
-        proxy_options = {"https://": proxy} if proxy else None
-
-        # httpx does not provide ready-made retry options so doing a simple implementation
-        async with httpx.AsyncClient(proxies=proxy_options) as client:
-            while status_code in [i for i in range(500, 600)]:
-                if retries < retry_options.get('count', 1): # not delaying for 1st attempt
-                    await asyncio.sleep(delay)
-                response = await client.get(url)
-                status_code = response.status_code
-                retries -= 1
-                if retries == 0:
-                    break
-
-            return response
     
 def scraper_factory(arg: str) -> Callable:
     if arg[-1] != '/':
