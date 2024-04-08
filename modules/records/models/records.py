@@ -6,4 +6,7 @@ class Records(BaseModel):
     updated_count: int = 0
 
     def save(self): #this can be overwritten to implement other storage strategies
-        print(f'no of products scraped: {self.scraped_count},\nno of products updated in db: {self.updated_count}')
+        print((
+            f'session_id: {self.session_id}\nno of products scraped: '
+            f'{self.scraped_count}\nno of products updated in db: {self.updated_count}\n'
+            ))
