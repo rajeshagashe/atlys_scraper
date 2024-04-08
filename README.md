@@ -3,8 +3,8 @@ scraper bot
 
 Python Version - 3.9.6 (app may not work properly for lower versions)
 
-for setup run one_time_setup.sh (this also activates the virtual env)
-to run the application execute `source run.sh` inside the folder where this repo is cloned
+for setup execute `source one_time_setup.sh` (this creates and activates new virtual env, and installs dependencies)
+to run the application execute `source run.sh`
 
 visit http://localhost:8000/docs when the application is running to see the api contracts
 
