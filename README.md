@@ -23,3 +23,5 @@ curl --location 'localhost:8000/v1/scrape' \
     "page_count": 15
 }'
 ```
+
+scraped data will be stored in database.json at root of the repo
